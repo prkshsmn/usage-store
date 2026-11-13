@@ -7,7 +7,7 @@ name = "usage-store"
 version = "1.0.0"
 description = "One SQLite file fed by cron collectors, a check that fails when a collector writes nothing, and a notification envelope with live, digest and silent tiers."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = { text = "MIT" }
 dependencies = []
 

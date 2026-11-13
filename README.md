@@ -98,7 +98,7 @@ DNS is stored as per-client, per-domain, per-day counts: the top 300 domains per
 
 ## Run it
 
-Requires Python 3.9 or newer. Nothing to install for a first look.
+Requires Python 3.10 or newer. Nothing to install for a first look.
 
 ```bash
 git clone https://github.com/prkshsmn/usage-store.git
