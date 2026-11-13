@@ -1,0 +1,45 @@
+{
+  "_comment": "The job registry: what each scheduled job is and how often it runs. The notifier reads cadence and purpose from here, so no sender has to restate them.",
+  "jobs": {
+    "disk-check": {
+      "project": "host",
+      "cadence": "every 6 hours",
+      "what": "Compares free space on the root volume and the backup volume against fixed bands."
+    },
+    "nightly-backup": {
+      "project": "host",
+      "cadence": "daily at 02:30",
+      "what": "Dumps the application databases and copies them to the backup volume."
+    },
+    "usage-check": {
+      "project": "platform",
+      "cadence": "daily at 06:00",
+      "what": "Fails when any usage collector has stopped running or has run without adding rows."
+    },
+    "token-expiry-check": {
+      "project": "media",
+      "cadence": "daily at 09:10",
+      "what": "Lists third-party integrations whose access token expires within three days."
+    },
+    "queue-repair": {
+      "project": "media",
+      "cadence": "daily at 23:00",
+      "what": "Retries items that have been stuck in the import queue for more than a day."
+    },
+    "daily-summary": {
+      "project": "platform",
+      "cadence": "daily at 07:30",
+      "what": "One line on yesterday's job runs: how many ran, how many failed."
+    },
+    "renewal-reminder": {
+      "project": "platform",
+      "cadence": "weekly on Monday",
+      "what": "Lists subscriptions that renew in the next 14 days."
+    },
+    "notify-digest": {
+      "project": "platform",
+      "cadence": "daily at 08:05",
+      "what": "Rolls every held notification into one morning push."
+    }
+  }
+}

@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "usage-store"
+version = "1.0.0"
+description = "One SQLite file fed by cron collectors, a check that fails when a collector writes nothing, and a notification envelope with live, digest and silent tiers."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+dependencies = []
+
+[project.scripts]
+usage-store = "usage_store.cli:main"
+notify-event = "notifier.event:cli"
+notify-digest = "notifier.digest:cli"
+
+[tool.setuptools]
+packages = ["usage_store", "notifier"]

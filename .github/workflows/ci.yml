@@ -1,0 +1,44 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.9", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Unit tests (standard library only, loopback only)
+        run: python -m unittest discover -s tests -v
+      - name: Install and run the console scripts
+        run: |
+          python -m pip install --quiet .
+          export USAGE_DB="$RUNNER_TEMP/usage.db" USAGE_EVENTS_DIR="$RUNNER_TEMP/events" RUN_JOB_EVENTS_DIR="$RUNNER_TEMP/events"
+          bin/run-job.sh ci-smoke -- true
+          usage-store jobs
+          usage-store export-stats
+          test "$(sqlite3 "$USAGE_DB" "SELECT COUNT(*) FROM events WHERE kind = 'job_run'")" = 1
+
+  sanitized:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Nothing private in the tree or in commit metadata
+        run: python scripts/check_sanitized.py --history

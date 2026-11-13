@@ -1,0 +1,35 @@
+# Example schedule for /etc/cron.d/usage-store. Adjust the user and paths.
+#
+# Cron runs with PATH=/usr/bin:/bin, so every binary here is an absolute path.
+# A line that works when pasted into a terminal can still fail on a schedule.
+#
+# The container sampler is deliberately NOT wrapped in run-job.sh. It runs 144
+# times a day, and wrapping it would add 288 event lines a day whose only
+# reader is the store it already writes to. It records itself in the store's
+# collector_runs table, and `check` watches it there.
+#
+# Why ten minutes and not five: one `docker stats --no-stream` over about 30
+# containers took about 2.2 seconds of wall time when measured. Ten minutes
+# halves that cost and loses nothing the question needs (RAM-hours per
+# container).
+
+REPO=/opt/usage-store
+PY=/usr/bin/python3
+WRAP=/opt/usage-store/bin/run-job.sh
+LOG=/var/log/usage-store/collect.log
+PYTHONPATH=/opt/usage-store
+USAGE_DOCKER_BIN=/usr/bin/docker
+USAGE_BACKUP_DIR=/mnt/backup/usage
+
+*/10 * * * *  ops $PY -m usage_store containers >> $LOG 2>&1
+15 4 * * *    ops $WRAP usage-disk -- $PY -m usage_store disk >> $LOG 2>&1
+42 4 * * *    ops $WRAP usage-jobs -- $PY -m usage_store jobs >> $LOG 2>&1
+44 4 * * *    ops $WRAP usage-notifications -- $PY -m usage_store notifications >> $LOG 2>&1
+50 4 * * *    ops $WRAP usage-backup -- $PY -m usage_store backup >> $LOG 2>&1
+
+# The daily check. A nonzero exit is recorded by the wrapper, and the
+# notification is raised from the check's own failure.
+0 6 * * *     ops $WRAP usage-check -- /bin/sh -c '$PY -m usage_store check || { $PY -m notifier.event --headline "a usage collector has gone quiet" --detail "run: usage-store status" --severity fail; exit 1; }' >> $LOG 2>&1
+
+# One push a morning, and only when something was held.
+5 8 * * *     ops $WRAP notify-digest -- $PY -m notifier.digest >> $LOG 2>&1

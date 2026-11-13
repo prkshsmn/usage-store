@@ -1,0 +1,66 @@
+{
+  "_comment": [
+    "Notification policy: for every sender, which tier it belongs in, whether its",
+    "output needs a human, and what the human should do. See notifier/policy.py.",
+    "An unlisted sender gets `defaults`, which escalate to a live push on failure.",
+    "A sender whose failure nobody can act on at 03:00 needs an explicit entry",
+    "with an empty escalate_on list."
+  ],
+  "defaults": {
+    "tier": "digest",
+    "action": "no",
+    "escalate_on": ["fail"],
+    "dedup_hours": 6,
+    "suggest": "No standing action. This sender has no policy entry yet, so it is treated as informational. Add one to the policy file."
+  },
+  "jobs": {
+    "disk-check": {
+      "tier": "live",
+      "action": "yes",
+      "dedup_hours": 72,
+      "suggest": "Free space on the volume named in the body."
+    },
+    "nightly-backup": {
+      "tier": "digest",
+      "action": "no",
+      "escalate_on": ["fail"],
+      "suggest": "A failed backup needs a look today. Check that the backup volume is mounted before anything else."
+    },
+    "usage-check": {
+      "tier": "digest",
+      "action": "yes",
+      "escalate_on": ["fail"],
+      "suggest": "A collector ran and wrote nothing, or stopped running. Run `usage-store status` and read the collector's log."
+    },
+    "token-expiry-check": {
+      "tier": "digest",
+      "action": "yes",
+      "escalate_on": [],
+      "suggest": "Re-authorise the integration named in the body. This is a standing condition, so it is a digest line and never a page."
+    },
+    "queue-repair": {
+      "tier": "digest",
+      "action": "no",
+      "escalate_on": [],
+      "suggest": "The repair job retried the stuck items by itself. Nothing to do unless the same item is listed three mornings running."
+    },
+    "daily-summary": {
+      "tier": "digest",
+      "action": "no",
+      "escalate_on": [],
+      "suggest": "Informational."
+    },
+    "renewal-reminder": {
+      "tier": "silent",
+      "action": "no",
+      "escalate_on": [],
+      "suggest": "Recorded only. Promote to digest if the reminder turns out to be wanted."
+    },
+    "notify-digest": {
+      "tier": "digest",
+      "action": "no",
+      "escalate_on": ["fail"],
+      "suggest": "The morning digest itself failed to send. Held items stay held and go out with the next run."
+    }
+  }
+}

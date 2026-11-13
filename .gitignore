@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+*.db
+*.db-wal
+*.db-shm
+*.jsonl
+.venv/
+# Site-specific terms for scripts/check_sanitized.py. Never committed: the
+# list itself names the things that must not appear here.
+.sanitize-denylist

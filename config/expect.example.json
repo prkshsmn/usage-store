@@ -1,0 +1,8 @@
+{
+  "_comment": "Point USAGE_EXPECT at a copy of this file. It replaces the built-in expectations, so list exactly the collectors this host schedules. max_hours is the longest gap allowed since the last clean run. must_add says whether a clean run that added zero rows in that window is itself a failure.",
+  "containers": {"max_hours": 1, "must_add": true},
+  "disk": {"max_hours": 30, "must_add": true},
+  "jobs": {"max_hours": 30, "must_add": true},
+  "notifications": {"max_hours": 30, "must_add": false},
+  "backup": {"max_hours": 30, "must_add": true}
+}
