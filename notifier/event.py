@@ -51,6 +51,7 @@ import hashlib
 import json
 import os
 import re
+import secrets
 import sys
 from datetime import datetime, timedelta
 
@@ -112,17 +113,20 @@ def recent_duplicate(rows: list[dict], key: str, now: datetime, window_h: float)
 
 
 def make_id(job_id: str, now: datetime, key: str) -> str:
-    """A readable, unique id.
+    """A readable id that is unique even for identical content.
 
-    Seconds and milliseconds are both in the stamp. The first version used
-    minutes plus the content hash, and the first test of the dedup path
-    produced a duplicate carrying the same id as the notification it
-    duplicated: identical content in the same minute hashes the same and
-    stamps the same.
+    The id is how a record is found again (the digest marks items sent by id),
+    so two records sharing one is a correctness bug, and it has happened twice.
+    Minutes plus the content hash collided on the first test of the dedup
+    path: identical content in the same minute hashes the same and stamps the
+    same. Milliseconds then collided on a faster interpreter in CI, where two
+    identical events landed inside one millisecond. A timestamp is not an
+    identity however fine it is, so the id now ends in random bits and the
+    timestamp is there for the reader.
     """
     stamp = now.strftime("%m%d%H%M%S") + f"{now.microsecond:06d}"[:3]
-    safe = job_id if ID_RE.match(job_id) else "unknown"
-    return f"{safe}-{stamp}-{key[:4]}"[:80]
+    safe = job_id[:40] if ID_RE.match(job_id) else "unknown"
+    return f"{safe}-{stamp}-{key[:4]}{secrets.token_hex(3)}"
 
 
 def trim(text: str, limit: int) -> str:

@@ -288,6 +288,20 @@ class Digest(NotifierCase):
         self.assertLessEqual(len(cut), 111)
 
 
+class Ids(unittest.TestCase):
+    def test_identical_content_at_the_identical_instant_still_gets_distinct_ids(self):
+        now = datetime(2026, 1, 5, 3, 0, 0, 123456).astimezone()
+        ids = {event.make_id("disk-check", now, "abcd1234") for _ in range(500)}
+        self.assertEqual(len(ids), 500)
+
+    def test_an_id_is_safe_to_use_as_a_path_segment(self):
+        now = datetime.now().astimezone()
+        for job in ("disk-check", "x" * 64, "Not A Valid Id!", "../../etc"):
+            nid = event.make_id(job, now, "abcd1234")
+            self.assertRegex(nid, r"^[a-z0-9][a-z0-9-]{0,79}$")
+        self.assertTrue(event.make_id("../../etc", now, "abcd1234").startswith("unknown-"))
+
+
 class StoreFile(NotifierCase):
     def test_a_truncated_line_is_skipped(self):
         store.append({"id": "a"})
