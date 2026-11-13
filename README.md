@@ -179,7 +179,7 @@ This is an extraction from a private repository that sits next to real infrastru
 
 - Collectors that only make sense for my own applications are left out. Eight of the eleven are here.
 - Paths, job names and the example policy are generic.
-- Two behaviours were tightened during the extraction, each with a test. The transport reports delivery through an exit code derived from the HTTP status (the original printed a line on stderr that the caller matched). And an imported log line is identified by its byte offset plus a hash of its bytes, after a test written for this repository showed that offset alone drops a new line that lands on an old offset after a truncation.
+- Three behaviours were tightened during the extraction, each with a test. The transport reports delivery through an exit code derived from the HTTP status (the original printed a line on stderr that the caller matched). An imported log line is identified by its byte offset plus a hash of its bytes, after a test written for this repository showed that offset alone drops a new line that lands on an old offset after a truncation. And a notification id ends in random bits, after CI on a faster interpreter put two identical events inside one millisecond and gave them the same id.
 
 [`scripts/check_sanitized.py`](scripts/check_sanitized.py) is part of the work, not an afterthought. It fails the build on private address ranges, email addresses, home directory paths, credential shapes, long hex identifiers, internal hostnames and any URL whose host is not on a short allowlist, and it can check commit metadata as well as files. Its own tests plant a sample for every rule, because a scanner that matches nothing passes every tree.
 
